@@ -41,4 +41,9 @@ class Config:
 
     # Session
     SESSION_COOKIE_NAME = 'study_review_session'
+    PERMANENT_SESSION_LIFETIME = 60 * 60 * 24 * 7  # 7天
+
+    # Flask-Login 记住我配置
+    REMEMBER_COOKIE_NAME = 'study_review_remember'
     REMEMBER_COOKIE_DURATION = 60 * 60 * 24 * 7  # 7天
+    REMEMBER_COOKIE_HTTPONLY = True

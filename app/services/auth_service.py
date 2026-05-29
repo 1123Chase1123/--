@@ -1,5 +1,6 @@
 """用户认证业务逻辑"""
 
+from flask import session
 from app import db
 from app.models.user import User
 from app.utils.security import validate_username, validate_password
@@ -39,6 +40,8 @@ class AuthService:
             return False, '用户名或密码错误'
 
         login_user(user, remember=remember)
+        if remember:
+            session.permanent = True
         return True, '登录成功'
 
     @staticmethod

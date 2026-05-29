@@ -114,7 +114,7 @@ def main():
     # ===== 桌面窗口 =====
     try:
         import webview
-        webview.create_window(
+        window = webview.create_window(
             title='考研复习系统',
             url=server_url,
             width=1200,
@@ -123,8 +123,17 @@ def main():
             resizable=True,
             fullscreen=False,
             text_select=True,
-            confirm_close=True,
         )
+
+        # 关闭窗口时中文确认对话框
+        def on_closing():
+            import ctypes
+            ret = ctypes.windll.user32.MessageBoxW(
+                0, '确定要退出考研复习系统吗？', '确认关闭', 4  # 4 = 是/否
+            )
+            return ret == 6  # 6 = 是
+
+        window.events.closing += on_closing
         webview.start()
 
     except Exception as e:
