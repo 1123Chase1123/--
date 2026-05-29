@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}今日复习 - 考研复习系统{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1 class="card-title">📖 今日复习</h1>
+    <p style="color: #888; margin-bottom: 20px;">
+        基于艾宾浩斯遗忘曲线，今天需要复习 {{ review_groups|length }} 个知识点
+    </p>
+
+    {% if review_groups %}
+    {% for note_id, group in review_groups.items() %}
+    <div class="review-note-card">
+        <h3>
+            <a href="{{ url_for('notes.note_detail', note_id=note_id) }}">
+                📄 {{ group.note.title }}
+            </a>
+        </h3>
+        <div class="note-item-meta" style="margin-bottom: 8px;">
+            <span class="badge badge-subject">{{ group.note.subject }}</span>
+            {% if group.note.chapter %}
+            <span>📖 {{ group.note.chapter }}</span>
+            {% endif %}
+        </div>
+
+        <div class="review-progress" title="复习进度: {{ group.plans | selectattr('status', 'equalto', 'completed') | list | length }}/{{ group.plans | length }}">
+            {% for plan in group.plans %}
+            <div class="review-dot {{ plan.status }}"
+                 title="第{{ plan.review_count }}次复习 - {{ plan.review_date.strftime('%m-%d') }}">
+            </div>
+            {% endfor %}
+        </div>
+
+        <div style="margin-top: 12px;">
+            {% for plan in group.plans %}
+            {% if plan.status == 'pending' and plan.review_date <= now() %}
+            <form method="POST" action="{{ url_for('review.complete_review', plan_id=plan.id) }}"
+                  style="display: inline;">
+                <button type="submit" class="btn btn-success btn-sm">
+                    ✅ 完成第{{ plan.review_count }}次复习
+                </button>
+            </form>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div style="text-align: center; padding: 60px 0;">
+        <p style="font-size: 48px; margin-bottom: 16px;">🎉</p>
+        <p style="color: #888; font-size: 16px;">今日没有待复习的知识点</p>
+        <p style="color: #aaa; margin-top: 8px;">
+            上传新知识点后将自动生成复习计划
+        </p>
+        <a href="{{ url_for('notes.create_note') }}" class="btn btn-primary" style="margin-top: 20px;">
+            ➕ 上传新知识点
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<div style="text-align: center; margin-top: 16px;">
+    <a href="{{ url_for('review.review_history') }}" class="btn btn-outline">📜 查看复习历史</a>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function now() { return new Date(); }
+</script>
+{% endblock %}

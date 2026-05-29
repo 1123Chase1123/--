@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}上传知识点 - 考研复习系统{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 800px; margin: 0 auto;">
+    <h1 class="card-title">📝 上传知识点</h1>
+
+    <form method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="title">标题</label>
+            <input type="text" id="title" name="title" class="form-input"
+                   placeholder="知识点标题" required autofocus>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="subject-select">科目</label>
+                <select id="subject-select" class="form-select" onchange="onSubjectChange(this)">
+                    <option value="">请选择科目</option>
+                    {% for s in subjects %}
+                    <option value="{{ s }}">{{ s }}</option>
+                    {% endfor %}
+                    <option value="__NEW__">➕ 新建科目...</option>
+                </select>
+                <input type="text" id="subject-new" name="subject" class="form-input"
+                       style="display: none;" placeholder="输入新科目名称">
+                <input type="hidden" id="subject-hidden" name="subject" value="">
+            </div>
+
+            <div class="form-group">
+                <label for="chapter">章节（选填）</label>
+                <input type="text" id="chapter" name="chapter" class="form-input"
+                       placeholder="如：第三章 线性表">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="difficulty">难度</label>
+                <select id="difficulty" name="difficulty" class="form-select">
+                    <option value="1">⭐ 简单</option>
+                    <option value="2">⭐⭐ 较易</option>
+                    <option value="3" selected>⭐⭐⭐ 中等</option>
+                    <option value="4">⭐⭐⭐⭐ 较难</option>
+                    <option value="5">⭐⭐⭐⭐⭐ 困难</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="tags">标签（逗号分隔）</label>
+                <input type="text" id="tags" name="tags" class="form-input"
+                       placeholder="如：数据结构, 链表, 重点">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="content">内容（支持 Markdown）</label>
+            <textarea id="content" name="content" class="form-textarea"
+                      placeholder="在此编写知识点内容，支持 Markdown 语法&#10;&#10;# 标题&#10;## 子标题&#10;正文...&#10;```代码块```" required></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="file">上传文件（选填：图片/PDF/Markdown）</label>
+            <input type="file" id="file" name="file" class="form-input"
+                   accept=".png,.jpg,.jpeg,.gif,.pdf,.md,.doc,.docx">
+        </div>
+
+        <div style="display: flex; gap: 12px;">
+            <button type="submit" class="btn btn-primary">保存知识点</button>
+            <a href="{{ url_for('notes.dashboard') }}" class="btn btn-outline">取消</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function onSubjectChange(sel) {
+    var newInput = document.getElementById('subject-new');
+    var hidden = document.getElementById('subject-hidden');
+    if (sel.value === '__NEW__') {
+        newInput.style.display = 'block';
+        newInput.focus();
+        hidden.value = '';
+        sel.style.display = 'none';
+    } else {
+        newInput.style.display = 'none';
+        hidden.value = sel.value;
+    }
+}
+</script>
+{% endblock %}

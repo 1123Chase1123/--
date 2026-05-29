@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}复习历史 - 考研复习系统{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1 class="card-title">📜 复习历史</h1>
+
+    {% if pagination.items %}
+    <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr style="border-bottom: 2px solid #f0f0f0; text-align: left;">
+                <th style="padding: 12px 8px;">知识点</th>
+                <th style="padding: 12px 8px;">复习次数</th>
+                <th style="padding: 12px 8px;">完成时间</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for plan in pagination.items %}
+            <tr style="border-bottom: 1px solid #f5f5f5;">
+                <td style="padding: 12px 8px;">
+                    <a href="{{ url_for('notes.note_detail', note_id=plan.note_id) }}">
+                        {{ plan.note.title }}
+                    </a>
+                    <span class="badge badge-subject" style="margin-left: 8px;">{{ plan.note.subject }}</span>
+                </td>
+                <td style="padding: 12px 8px;">第 {{ plan.review_count }} 次</td>
+                <td style="padding: 12px 8px; color: #888;">
+                    {{ plan.completed_at.strftime('%Y-%m-%d %H:%M') if plan.completed_at else '-' }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if pagination.pages > 1 %}
+    <div class="pagination">
+        {% if pagination.has_prev %}
+        <a href="{{ url_for('review.review_history', page=pagination.prev_num) }}" class="page-link">← 上一页</a>
+        {% endif %}
+        {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+            {% if p %}
+            <a href="{{ url_for('review.review_history', page=p) }}" class="page-link {% if p == pagination.page %}active{% endif %}">{{ p }}</a>
+            {% else %}
+            <span class="page-link">…</span>
+            {% endif %}
+        {% endfor %}
+        {% if pagination.has_next %}
+        <a href="{{ url_for('review.review_history', page=pagination.next_num) }}" class="page-link">下一页 →</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <p style="color: #888; text-align: center; padding: 60px 0;">
+        还没有完成任何复习记录
+    </p>
+    {% endif %}
+</div>
+
+<div style="margin-top: 16px;">
+    <a href="{{ url_for('review.review_today') }}" class="btn btn-outline">← 返回今日复习</a>
+</div>
+{% endblock %}

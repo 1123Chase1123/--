@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}注册 - 考研复习系统{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-card">
+        <h1>创建账号</h1>
+        <p class="subtitle">加入考研复习，高效掌握知识点</p>
+
+        <form method="POST">
+            <div class="form-group">
+                <label for="username">用户名</label>
+                <input type="text" id="username" name="username" class="form-input"
+                       placeholder="3-20位字母数字或中文" required autofocus>
+            </div>
+
+            <div class="form-group">
+                <label for="email">邮箱（选填）</label>
+                <input type="email" id="email" name="email" class="form-input"
+                       placeholder="example@email.com">
+            </div>
+
+            <div class="form-group">
+                <label for="password">密码</label>
+                <input type="password" id="password" name="password" class="form-input"
+                       placeholder="至少6位密码" required>
+            </div>
+
+            <div class="form-group">
+                <label for="confirm_password">确认密码</label>
+                <input type="password" id="confirm_password" name="confirm_password" class="form-input"
+                       placeholder="再次输入密码" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">注 册</button>
+        </form>
+
+        <div class="form-footer">
+            已有账号？ <a href="{{ url_for('auth.login') }}">立即登录</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

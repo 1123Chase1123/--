@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}统计分析 - 考研复习系统{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1 class="card-title">📊 学习统计</h1>
+
+    <!-- 概览数据 -->
+    <div class="stats-grid" id="summary-stats">
+        <div class="stat-card"><div class="stat-number">-</div><div class="stat-label">📝 总知识点</div></div>
+        <div class="stat-card"><div class="stat-number">-</div><div class="stat-label">📖 总复习次数</div></div>
+        <div class="stat-card"><div class="stat-number">-</div><div class="stat-label">⏰ 待复习</div></div>
+    </div>
+
+    <!-- 图表容器 -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div id="chart-subject" style="height: 300px;"></div>
+        <div id="chart-mastery" style="height: 300px;"></div>
+        <div id="chart-trend" style="height: 300px; grid-column: 1 / -1;"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+fetch('{{ url_for("statistics.api_summary") }}')
+    .then(r => r.json())
+    .then(data => {
+        // 更新概览
+        document.querySelector('#summary-stats .stat-card:nth-child(1) .stat-number').textContent = data.total_notes;
+        document.querySelector('#summary-stats .stat-card:nth-child(2) .stat-number').textContent = data.total_reviews;
+        document.querySelector('#summary-stats .stat-card:nth-child(3) .stat-number').textContent = data.pending_reviews;
+
+        // 科目分布
+        var subjects = Object.keys(data.subjects);
+        var subValues = Object.values(data.subjects);
+        echarts.init(document.getElementById('chart-subject')).setOption({
+            title: { text: '科目分布', left: 'center', textStyle: { fontSize: 14 } },
+            tooltip: { trigger: 'item' },
+            series: [{
+                type: 'pie',
+                radius: '60%',
+                data: subjects.map((s, i) => ({ name: s, value: subValues[i] })),
+                label: { formatter: '{b}: {c}' }
+            }]
+        });
+
+        // 掌握程度
+        var masteryMap = {0:'未掌握',1:'一级',2:'二级',3:'三级',4:'四级',5:'完全掌握'};
+        var masteryData = Object.entries(data.mastery).map(([k,v]) => ({
+            name: masteryMap[k] || k, value: v
+        }));
+        echarts.init(document.getElementById('chart-mastery')).setOption({
+            title: { text: '掌握程度分布', left: 'center', textStyle: { fontSize: 14 } },
+            tooltip: { trigger: 'item' },
+            series: [{
+                type: 'pie',
+                radius: '60%',
+                data: masteryData.length ? masteryData : [{name: '暂无数据', value: 1}],
+                label: { formatter: '{b}: {c}' }
+            }]
+        });
+
+        // 近7天复习趋势
+        echarts.init(document.getElementById('chart-trend')).setOption({
+            title: { text: '近7天复习趋势', left: 'center', textStyle: { fontSize: 14 } },
+            tooltip: { trigger: 'axis' },
+            xAxis: { type: 'category', data: data.review_trend.map(d => d.date) },
+            yAxis: { type: 'value', minInterval: 1 },
+            series: [{
+                type: 'line',
+                data: data.review_trend.map(d => d.count),
+                smooth: true,
+                areaStyle: { opacity: 0.15 },
+                lineStyle: { color: '#4a90d9' },
+                itemStyle: { color: '#4a90d9' }
+            }]
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}历史记录 - 考研复习系统{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1 class="card-title">📋 知识点历史</h1>
+
+    <!-- 搜索栏 -->
+    <form method="GET" class="search-bar">
+        <input type="text" name="search" class="form-input"
+               placeholder="🔍 搜索标题或内容..." value="{{ current_search }}">
+
+        <select name="subject" class="form-select" style="width: auto;">
+            <option value="">全部科目</option>
+            {% for s in subjects %}
+            <option value="{{ s }}" {% if s == current_subject %}selected{% endif %}>{{ s }}</option>
+            {% endfor %}
+        </select>
+
+        <select name="tag" class="form-select" style="width: auto;">
+            <option value="">全部标签</option>
+            {% for t in tags %}
+            <option value="{{ t.tag_name }}" {% if t.tag_name == current_tag %}selected{% endif %}>
+                #{{ t.tag_name }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <button type="submit" class="btn btn-primary btn-sm">筛选</button>
+        <a href="{{ url_for('notes.history') }}" class="btn btn-outline btn-sm">重置</a>
+    </form>
+
+    <!-- 知识点列表 -->
+    {% if pagination.items %}
+    <ul class="note-list">
+        {% for note in pagination.items %}
+        <li class="note-item">
+            <div class="note-item-info">
+                <h3><a href="{{ url_for('notes.note_detail', note_id=note.id) }}">{{ note.title }}</a></h3>
+                <div class="note-item-meta">
+                    <span class="badge badge-subject">{{ note.subject }}</span>
+                    {% if note.chapter %}
+                    <span>📖 {{ note.chapter }}</span>
+                    {% endif %}
+                    <span>难度: {{ '⭐' * note.difficulty }}</span>
+                    <span>复习 {{ note.review_plans.count() }} 次</span>
+                    {% if note.is_mistake %}
+                    <span class="badge badge-mistake">⚠️ 易错</span>
+                    {% endif %}
+                    {% for tag in note.tags.all()[:3] %}
+                    <span class="badge badge-tag">#{{ tag.tag_name }}</span>
+                    {% endfor %}
+                    <span>{{ note.updated_at.strftime('%Y-%m-%d') }}</span>
+                </div>
+            </div>
+            <a href="{{ url_for('notes.note_detail', note_id=note.id) }}" class="btn btn-outline btn-sm">查看</a>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <!-- 分页 -->
+    {% if pagination.pages > 1 %}
+    <div class="pagination">
+        {% if pagination.has_prev %}
+        <a href="{{ url_for('notes.history', page=pagination.prev_num, subject=current_subject, tag=current_tag, search=current_search) }}"
+           class="page-link">← 上一页</a>
+        {% endif %}
+
+        {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+            {% if p %}
+            <a href="{{ url_for('notes.history', page=p, subject=current_subject, tag=current_tag, search=current_search) }}"
+               class="page-link {% if p == pagination.page %}active{% endif %}">{{ p }}</a>
+            {% else %}
+            <span class="page-link">…</span>
+            {% endif %}
+        {% endfor %}
+
+        {% if pagination.has_next %}
+        <a href="{{ url_for('notes.history', page=pagination.next_num, subject=current_subject, tag=current_tag, search=current_search) }}"
+           class="page-link">下一页 →</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <p style="color: #888; text-align: center; padding: 60px 0;">
+        {% if current_search or current_subject or current_tag %}
+        没有找到匹配的知识点
+        {% else %}
+        还没有知识点，<a href="{{ url_for('notes.create_note') }}">上传第一个知识点</a>
+        {% endif %}
+    </p>
+    {% endif %}
+</div>
+{% endblock %}

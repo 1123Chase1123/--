@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}主页 - 考研复习系统{% endblock %}
+
+{% block content %}
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-number">{{ total_notes }}</div>
+        <div class="stat-label">📝 总知识点</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">{{ pending_reviews }}</div>
+        <div class="stat-label">⏰ 待复习</div>
+    </div>
+    <div class="stat-card">
+        <a href="{{ url_for('notes.create_note') }}" class="btn btn-primary">➕ 上传新知识点</a>
+    </div>
+</div>
+
+<div class="card">
+    <h2 class="card-title">📄 最近知识点</h2>
+    {% if recent_notes %}
+    <ul class="note-list">
+        {% for note in recent_notes %}
+        <li class="note-item">
+            <div class="note-item-info">
+                <h3><a href="{{ url_for('notes.note_detail', note_id=note.id) }}">{{ note.title }}</a></h3>
+                <div class="note-item-meta">
+                    <span class="badge badge-subject">{{ note.subject }}</span>
+                    {% if note.chapter %}
+                    <span>{{ note.chapter }}</span>
+                    {% endif %}
+                    <span>难度: {{ '⭐' * note.difficulty }}</span>
+                    <span>掌握: {{ '●' * note.mastery_level }}{{ '○' * (5 - note.mastery_level) }}</span>
+                    <span>{{ note.updated_at.strftime('%m-%d %H:%M') }}</span>
+                </div>
+            </div>
+            <a href="{{ url_for('notes.note_detail', note_id=note.id) }}" class="btn btn-outline btn-sm">查看</a>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p style="color: #888; text-align: center; padding: 40px 0;">
+        还没有知识点，<a href="{{ url_for('notes.create_note') }}">开始上传第一个</a>
+    </p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h2 class="card-title">📅 快速入口</h2>
+    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <a href="{{ url_for('review.review_today') }}" class="btn btn-success">📖 开始今日复习</a>
+        <a href="{{ url_for('notes.history') }}" class="btn btn-outline">📋 查看全部知识点</a>
+        <a href="{{ url_for('statistics.statistics') }}" class="btn btn-outline">📊 学习统计</a>
+    </div>
+</div>
+{% endblock %}

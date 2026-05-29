@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}{{ note.title }} - 考研复习系统{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+        <div>
+            <h1>{{ note.title }}</h1>
+            <div class="note-item-meta" style="margin-top: 8px;">
+                <span class="badge badge-subject">{{ note.subject }}</span>
+                {% if note.chapter %}
+                <span>📖 {{ note.chapter }}</span>
+                {% endif %}
+                <span>难度: {{ '⭐' * note.difficulty }}</span>
+                <span>掌握: {{ '●' * note.mastery_level }}{{ '○' * (5 - note.mastery_level) }}</span>
+                {% if note.is_mistake %}
+                <span class="badge badge-mistake">⚠️ 易错</span>
+                {% endif %}
+                <span>{{ note.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+            </div>
+            {% if note.tags.all() %}
+            <div style="margin-top: 8px;">
+                {% for tag in note.tags.all() %}
+                <span class="badge badge-tag">#{{ tag.tag_name }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <a href="{{ url_for('notes.edit_note', note_id=note.id) }}" class="btn btn-outline btn-sm">✏️ 编辑</a>
+            <form method="POST" action="{{ url_for('notes.delete_note', note_id=note.id) }}"
+                  style="display: inline;" onsubmit="return confirm('确定删除此知识点？')">
+                <button type="submit" class="btn btn-danger btn-sm">🗑️ 删除</button>
+            </form>
+        </div>
+    </div>
+
+    {% if note.file_path %}
+    <div style="margin-bottom: 16px;">
+        <a href="{{ url_for('static', filename=note.file_path) }}" target="_blank"
+           class="btn btn-outline btn-sm">📎 查看附件</a>
+    </div>
+    {% endif %}
+
+    <hr style="margin: 16px 0; border: none; border-top: 1px solid #f0f0f0;">
+
+    <div class="markdown-content">
+        {{ note.content | replace('\n', '<br>') | safe }}
+    </div>
+</div>
+
+<div style="display: flex; gap: 12px; margin-top: 16px;">
+    <a href="{{ url_for('notes.history') }}" class="btn btn-outline">← 返回历史</a>
+    <a href="{{ url_for('notes.dashboard') }}" class="btn btn-outline">返回主页</a>
+</div>
+{% endblock %}
